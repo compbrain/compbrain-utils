@@ -1,0 +1,78 @@
+#!/usr/bin/python
+# $Id$
+# $URL$
+
+"""Control program for WebPowerSwitch library and PDU
+
+Send commands to a WebPowerSwitch PDU from the command line
+"""
+
+__author__ = 'compbrain@gmail.com (Will Nowak)'
+
+# System imports
+from optparse import OptionParser
+import sys
+sys.path.append('../lib')
+# Application imports
+import WebPowerSwitch
+import logging
+logging.basicConfig(level=logging.INFO)
+
+def buildParser():
+  parser = OptionParser()
+  parser.add_option('-i', '--ip', dest='ip', help='PDU IP Address',
+                    default='192.168.0.100')
+  parser.add_option('-p', '--port', dest='port', help='PDU HTTP Port',
+                    default='80')
+  parser.add_option('-u', '--user', dest='user', help='PDU Auth User',
+                    default='admin')
+  parser.add_option('-s', '--pass', dest='password', help='PDU Auth Password',
+                    default='1234')
+  parser.add_option('-o', '--outlet', dest='outlets', help='Outlet to act on',
+                    action='append', type='int', default=[])
+  parser.add_option('-a', '--all', dest='all_outlets',
+                    help='Act on all outlets', default=False,
+                    action='store_true')
+  parser.add_option('-f', '--function', dest='function',
+                    help='Function to perform: on, off, or cycle')
+  return parser
+
+def readAndAct():
+  parser = buildParser()
+  (options, args) = parser.parse_args()
+  if not options.function or options.function not in ['on', 'off', 'cycle']:
+    parser.error("-f must be specified and one of on, off, or cycle")
+  if len(options.outlets) and options.all_outlets:
+    parser.error("options -o and -a are mutually exclusive")
+  if not len(options.outlets) and not options.all_outlets:
+    parser.error("You must specify at least one outlet, or all outlets "
+                 "(-o or -a)")
+  pdu = WebPowerSwitch.WebPowerSwitch(options.user, options.password,
+                                      options.ip, options.port)
+
+  if options.all_outlets:
+    if options.function == 'on':
+      pdu.all_on()
+      logging.info('Turned on all ports')
+    elif options.function == 'off':
+      pdu.all_off()
+      logging.info('Turned off all ports')
+    elif options.function == 'cycle':
+      pdu.all_cycle()
+      logging.info('Cycled all ports')
+  else:
+    if options.function == 'on':
+      for outlet in options.outlets:
+        pdu.on(outlet)
+        logging.info('Turned on port %s' % outlet)
+    elif options.function == 'off':
+      for outlet in options.outlets:
+        pdu.off(outlet)
+        logging.info('Turned off port %s' % outlet)
+    elif options.function == 'cycle':
+      for outlet in options.outlets:
+        pdu.cycle(outlet)
+        logging.info('Cycled port %s' % outlet)
+
+if __name__ == '__main__':
+  readAndAct()

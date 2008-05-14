@@ -14,7 +14,7 @@ import urllib
 import re
 import time
 
-NUMOUTlETS = 8
+NUMOUTLETS = 8
 STATUS_MATCH = re.compile(r'\<a href=outlet\?([1-8])=(ON|OFF)\>')
 BOOLEAN_ONOFF_TABLE = {True:'ON', False:'OFF'}
 
@@ -127,7 +127,7 @@ class WebPowerSwitch:
 
   def all_off(self):
     ''' Turn off all outlets '''
-    self._alloperation('ON')
+    self._alloperation('OFF')
 
   def cycle(self, outlet_number, method='software'):
     ''' Power cycle an outlet
