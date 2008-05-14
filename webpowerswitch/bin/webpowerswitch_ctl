@@ -40,6 +40,9 @@ def buildParser():
 def readAndAct():
   parser = buildParser()
   (options, args) = parser.parse_args()
+  if not len(sys.argv[1:]):
+    parser.print_help()
+    sys.exit(1)
   if not options.function or options.function not in ['on', 'off', 'cycle']:
     parser.error("-f must be specified and one of on, off, or cycle")
   if len(options.outlets) and options.all_outlets:
